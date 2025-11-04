@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RedisAssistant.ViewModels"
+             x:Class="RedisAssistant.Views.KeysPage"
+             Title="Redis Keys">
+
+    <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="15">
+        
+        <!-- Search and Actions -->
+        <VerticalStackLayout Grid.Row="0" Spacing="10">
+            <Label Text="{Binding StatusMessage}" FontAttributes="Italic" />
+            
+            <HorizontalStackLayout Spacing="10">
+                <Entry Text="{Binding SearchPattern}" 
+                       Placeholder="Search pattern (e.g., user:*)" 
+                       HorizontalOptions="FillAndExpand" />
+                <Button Text="Search" Command="{Binding LoadKeysCommand}" />
+                <Button Text="Refresh" Command="{Binding RefreshCommand}" />
+            </HorizontalStackLayout>
+
+            <!-- Add New Key -->
+            <Frame BorderColor="LightGray" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Add New Key" FontSize="16" FontAttributes="Bold" />
+                    <Entry Text="{Binding NewKeyName}" Placeholder="Key name" />
+                    <Entry Text="{Binding NewKeyValue}" Placeholder="Value" />
+                    <Button Text="Add Key" Command="{Binding AddKeyCommand}" />
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+
+        <!-- Keys List and Details -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,2*" ColumnSpacing="15">
+            
+            <!-- Keys List -->
+            <Frame Grid.Column="0" BorderColor="LightGray" Padding="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Keys" FontSize="16" FontAttributes="Bold" />
+                    <CollectionView ItemsSource="{Binding Keys}" 
+                                    SelectedItem="{Binding SelectedKey}"
+                                    SelectionMode="Single">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame BorderColor="LightGray" Padding="10" Margin="0,5">
+                                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto">
+                                        <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" />
+                                        <Label Grid.Row="1" Grid.Column="0" Text="{Binding Type}" FontSize="12" />
+                                        <Label Grid.Row="2" Grid.Column="0" 
+                                               Text="{Binding Size, StringFormat='Size: {0}'}" 
+                                               FontSize="10" />
+                                        <Button Grid.Row="0" Grid.Column="1" Grid.RowSpan="3"
+                                                Text="View"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:KeysViewModel}}, Path=ViewKeyCommand}"
+                                                CommandParameter="{Binding .}"
+                                                VerticalOptions="Center" />
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Key Details -->
+            <Frame Grid.Column="1" BorderColor="LightGray" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Key Details" FontSize="16" FontAttributes="Bold" />
+                    
+                    <Label Text="{Binding SelectedKey.Name, StringFormat='Key: {0}'}" IsVisible="{Binding SelectedKey, Converter={StaticResource IsNotNullConverter}}" />
+                    <Label Text="{Binding SelectedKey.Type, StringFormat='Type: {0}'}" IsVisible="{Binding SelectedKey, Converter={StaticResource IsNotNullConverter}}" />
+                    <Label Text="{Binding SelectedKey.Size, StringFormat='Size: {0} bytes'}" IsVisible="{Binding SelectedKey, Converter={StaticResource IsNotNullConverter}}" />
+                    <Label Text="{Binding SelectedKey.Ttl, StringFormat='TTL: {0}'}" IsVisible="{Binding SelectedKey, Converter={StaticResource IsNotNullConverter}}" />
+                    
+                    <Label Text="Value:" FontAttributes="Bold" IsVisible="{Binding SelectedKey, Converter={StaticResource IsNotNullConverter}}" />
+                    <Editor Text="{Binding KeyValue}" 
+                            HeightRequest="300"
+                            IsVisible="{Binding SelectedKey, Converter={StaticResource IsNotNullConverter}}"
+                            IsReadOnly="True" />
+                    
+                    <Button Text="Delete Key" 
+                            Command="{Binding DeleteKeyCommand}"
+                            CommandParameter="{Binding SelectedKey}"
+                            IsVisible="{Binding SelectedKey, Converter={StaticResource IsNotNullConverter}}"
+                            BackgroundColor="Red"
+                            TextColor="White" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </Grid>
+
+    </Grid>
+</ContentPage>

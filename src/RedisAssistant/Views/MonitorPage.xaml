@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RedisAssistant.ViewModels"
+             x:Class="RedisAssistant.Views.MonitorPage"
+             Title="Redis Monitor">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            
+            <!-- Status and Controls -->
+            <Frame BorderColor="LightGray" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="{Binding StatusMessage}" FontAttributes="Italic" />
+                    <HorizontalStackLayout Spacing="10">
+                        <Button Text="Load Info" Command="{Binding LoadServerInfoCommand}" />
+                        <Button Text="Start Monitoring" 
+                                Command="{Binding StartMonitoringCommand}"
+                                IsEnabled="{Binding IsMonitoring, Converter={StaticResource InvertedBoolConverter}}" />
+                        <Button Text="Stop Monitoring" 
+                                Command="{Binding StopMonitoringCommand}"
+                                IsEnabled="{Binding IsMonitoring}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Server Information -->
+            <Frame BorderColor="LightGray" Padding="15">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" 
+                      ColumnDefinitions="*,*" 
+                      RowSpacing="15"
+                      ColumnSpacing="20">
+                    
+                    <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+                           Text="Server Information" 
+                           FontSize="18" 
+                           FontAttributes="Bold" />
+
+                    <!-- Version -->
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="5">
+                        <Label Text="Redis Version" FontAttributes="Bold" />
+                        <Label Text="{Binding Version}" FontSize="24" />
+                    </VerticalStackLayout>
+
+                    <!-- Used Memory -->
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="5">
+                        <Label Text="Used Memory" FontAttributes="Bold" />
+                        <Label Text="{Binding UsedMemory}" FontSize="24" />
+                    </VerticalStackLayout>
+
+                    <!-- Total Keys -->
+                    <VerticalStackLayout Grid.Row="2" Grid.Column="0" Spacing="5">
+                        <Label Text="Total Keys" FontAttributes="Bold" />
+                        <Label Text="{Binding TotalKeys}" FontSize="24" />
+                    </VerticalStackLayout>
+
+                    <!-- Connected Clients -->
+                    <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="5">
+                        <Label Text="Connected Clients" FontAttributes="Bold" />
+                        <Label Text="{Binding ConnectedClients}" FontSize="24" />
+                    </VerticalStackLayout>
+
+                    <!-- Total Commands -->
+                    <VerticalStackLayout Grid.Row="3" Grid.Column="0" Spacing="5">
+                        <Label Text="Total Commands" FontAttributes="Bold" />
+                        <Label Text="{Binding TotalCommands}" FontSize="24" />
+                    </VerticalStackLayout>
+
+                    <!-- Uptime -->
+                    <VerticalStackLayout Grid.Row="3" Grid.Column="1" Spacing="5">
+                        <Label Text="Uptime" FontAttributes="Bold" />
+                        <Label Text="{Binding Uptime}" FontSize="24" />
+                    </VerticalStackLayout>
+
+                </Grid>
+            </Frame>
+
+            <!-- Additional Info -->
+            <Frame BorderColor="LightGray" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="About" FontSize="18" FontAttributes="Bold" />
+                    <Label Text="RedisAssistant - A .NET MAUI application for managing and monitoring Redis servers." />
+                    <Label Text="Features:" FontAttributes="Bold" />
+                    <Label Text="• Connect to multiple Redis instances" />
+                    <Label Text="• View and manage keys" />
+                    <Label Text="• Monitor server statistics in real-time" />
+                    <Label Text="• Support for SSL connections" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
