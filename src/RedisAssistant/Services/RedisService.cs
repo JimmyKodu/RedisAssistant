@@ -75,8 +75,7 @@ public class RedisService : IRedisService, IDisposable
             var keys = new List<RedisKey>();
             var server = _connection.GetServer(_connection.GetEndPoints().First());
 
-            var asyncEnumerable = server.KeysAsync(pattern: pattern);
-            await foreach (var key in asyncEnumerable)
+            await foreach (var key in server.KeysAsync(pattern: pattern))
             {
                 var type = await _database.KeyTypeAsync(key).ConfigureAwait(false);
                 var ttl = await _database.KeyTimeToLiveAsync(key).ConfigureAwait(false);

@@ -81,7 +81,7 @@ public partial class MonitorViewModel : ObservableObject
         }
         catch (Exception)
         {
-            // Log or handle other exceptions
+            // Handle other exceptions to prevent monitoring loop crash
             IsMonitoring = false;
             StatusMessage = "Monitoring stopped due to error";
         }
