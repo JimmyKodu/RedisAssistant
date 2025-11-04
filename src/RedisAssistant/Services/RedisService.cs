@@ -75,11 +75,26 @@ public class RedisService : IRedisService, IDisposable
             var keys = new List<RedisKey>();
             var server = _connection.GetServer(_connection.GetEndPoints().First());
 
-            await foreach (var key in server.KeysAsync(pattern: pattern).ConfigureAwait(false))
+            var asyncEnumerable = server.KeysAsync(pattern: pattern);
+            await foreach (var key in asyncEnumerable)
             {
                 var type = await _database.KeyTypeAsync(key).ConfigureAwait(false);
                 var ttl = await _database.KeyTimeToLiveAsync(key).ConfigureAwait(false);
-                var size = await _database.StringLengthAsync(key).ConfigureAwait(false);
+                
+                long size = 0;
+                try
+                {
+                    // StringLengthAsync only works for string types
+                    if (type == RedisType.String)
+                    {
+                        size = await _database.StringLengthAsync(key).ConfigureAwait(false);
+                    }
+                }
+                catch
+                {
+                    // Ignore size calculation errors for non-string types
+                    size = 0;
+                }
 
                 keys.Add(new RedisKey
                 {
