@@ -53,7 +53,7 @@ public partial class MonitorViewModel : ObservableObject
         }
 
         StatusMessage = "Loading server info...";
-        ServerInfo = await _redisService.GetServerInfoAsync();
+        ServerInfo = await _redisService.GetServerInfoAsync().ConfigureAwait(false);
         UpdateDisplayValues();
         StatusMessage = "Server info loaded";
     }
@@ -71,13 +71,19 @@ public partial class MonitorViewModel : ObservableObject
         {
             while (!_monitoringCts.Token.IsCancellationRequested)
             {
-                await LoadServerInfoAsync();
-                await Task.Delay(2000, _monitoringCts.Token);
+                await LoadServerInfoAsync().ConfigureAwait(false);
+                await Task.Delay(2000, _monitoringCts.Token).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException)
         {
             // Expected when monitoring is stopped
+        }
+        catch (Exception)
+        {
+            // Log or handle other exceptions
+            IsMonitoring = false;
+            StatusMessage = "Monitoring stopped due to error";
         }
     }
 

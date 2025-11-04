@@ -72,7 +72,7 @@ public partial class ConnectionsViewModel : ObservableObject
             return;
 
         StatusMessage = "Connecting...";
-        var success = await _redisService.ConnectAsync(connection);
+        var success = await _redisService.ConnectAsync(connection).ConfigureAwait(false);
 
         if (success)
         {
@@ -90,7 +90,7 @@ public partial class ConnectionsViewModel : ObservableObject
     [RelayCommand]
     private async Task DisconnectAsync()
     {
-        await _redisService.DisconnectAsync();
+        await _redisService.DisconnectAsync().ConfigureAwait(false);
         IsConnected = false;
         StatusMessage = "Disconnected";
         SelectedConnection = null;
