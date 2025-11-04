@@ -46,7 +46,7 @@ public partial class KeysViewModel : ObservableObject
         }
 
         StatusMessage = "Loading keys...";
-        var keys = await _redisService.GetKeysAsync(SearchPattern);
+        var keys = await _redisService.GetKeysAsync(SearchPattern).ConfigureAwait(false);
         Keys.Clear();
         foreach (var key in keys)
         {
@@ -62,7 +62,7 @@ public partial class KeysViewModel : ObservableObject
             return;
 
         StatusMessage = "Loading key value...";
-        var value = await _redisService.GetValueAsync(key.Name);
+        var value = await _redisService.GetValueAsync(key.Name).ConfigureAwait(false);
         KeyValue = value;
         SelectedKey = key;
         StatusMessage = "Key loaded";
@@ -78,14 +78,14 @@ public partial class KeysViewModel : ObservableObject
         }
 
         StatusMessage = "Adding key...";
-        var success = await _redisService.SetValueAsync(NewKeyName, NewKeyValue);
+        var success = await _redisService.SetValueAsync(NewKeyName, NewKeyValue).ConfigureAwait(false);
 
         if (success)
         {
             StatusMessage = "Key added successfully";
             NewKeyName = string.Empty;
             NewKeyValue = string.Empty;
-            await LoadKeysAsync();
+            await LoadKeysAsync().ConfigureAwait(false);
         }
         else
         {
@@ -100,7 +100,7 @@ public partial class KeysViewModel : ObservableObject
             return;
 
         StatusMessage = "Deleting key...";
-        var success = await _redisService.DeleteKeyAsync(key.Name);
+        var success = await _redisService.DeleteKeyAsync(key.Name).ConfigureAwait(false);
 
         if (success)
         {
@@ -121,6 +121,6 @@ public partial class KeysViewModel : ObservableObject
     [RelayCommand]
     private async Task RefreshAsync()
     {
-        await LoadKeysAsync();
+        await LoadKeysAsync().ConfigureAwait(false);
     }
 }

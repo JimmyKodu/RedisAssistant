@@ -16,11 +16,12 @@ public interface IRedisService
     RedisConnection? CurrentConnection { get; }
 }
 
-public class RedisService : IRedisService
+public class RedisService : IRedisService, IDisposable
 {
     private ConnectionMultiplexer? _connection;
     private IDatabase? _database;
     private RedisConnection? _currentConnection;
+    private bool _disposed;
 
     public bool IsConnected => _connection?.IsConnected ?? false;
     public RedisConnection? CurrentConnection => _currentConnection;
@@ -31,13 +32,16 @@ public class RedisService : IRedisService
         {
             if (_connection != null)
             {
-                await DisconnectAsync();
+                await DisconnectAsync().ConfigureAwait(false);
             }
 
             var configOptions = ConfigurationOptions.Parse(connection.ConnectionString);
             configOptions.AbortOnConnectFail = false;
+            configOptions.SyncTimeout = 5000;
+            configOptions.AsyncTimeout = 5000;
+            configOptions.ConnectTimeout = 5000;
 
-            _connection = await ConnectionMultiplexer.ConnectAsync(configOptions);
+            _connection = await ConnectionMultiplexer.ConnectAsync(configOptions).ConfigureAwait(false);
             _database = _connection.GetDatabase(connection.Database);
             _currentConnection = connection;
 
@@ -53,7 +57,7 @@ public class RedisService : IRedisService
     {
         if (_connection != null)
         {
-            await _connection.CloseAsync();
+            await _connection.CloseAsync().ConfigureAwait(false);
             _connection.Dispose();
             _connection = null;
             _database = null;
@@ -73,9 +77,23 @@ public class RedisService : IRedisService
 
             await foreach (var key in server.KeysAsync(pattern: pattern))
             {
-                var type = await _database.KeyTypeAsync(key);
-                var ttl = await _database.KeyTimeToLiveAsync(key);
-                var size = await _database.StringLengthAsync(key);
+                var type = await _database.KeyTypeAsync(key).ConfigureAwait(false);
+                var ttl = await _database.KeyTimeToLiveAsync(key).ConfigureAwait(false);
+                
+                long size = 0;
+                try
+                {
+                    // StringLengthAsync only works for string types
+                    if (type == RedisType.String)
+                    {
+                        size = await _database.StringLengthAsync(key).ConfigureAwait(false);
+                    }
+                }
+                catch
+                {
+                    // Ignore size calculation errors for non-string types
+                    size = 0;
+                }
 
                 keys.Add(new RedisKey
                 {
@@ -101,7 +119,7 @@ public class RedisService : IRedisService
 
         try
         {
-            var value = await _database.StringGetAsync(key);
+            var value = await _database.StringGetAsync(key).ConfigureAwait(false);
             return value.ToString();
         }
         catch (Exception)
@@ -117,7 +135,7 @@ public class RedisService : IRedisService
 
         try
         {
-            return await _database.StringSetAsync(key, value, expiry);
+            return await _database.StringSetAsync(key, value, expiry).ConfigureAwait(false);
         }
         catch (Exception)
         {
@@ -132,7 +150,7 @@ public class RedisService : IRedisService
 
         try
         {
-            return await _database.KeyDeleteAsync(key);
+            return await _database.KeyDeleteAsync(key).ConfigureAwait(false);
         }
         catch (Exception)
         {
@@ -148,7 +166,7 @@ public class RedisService : IRedisService
         try
         {
             var server = _connection.GetServer(_connection.GetEndPoints().First());
-            var info = await server.InfoAsync();
+            var info = await server.InfoAsync().ConfigureAwait(false);
 
             var serverInfo = new RedisServerInfo();
 
@@ -184,7 +202,7 @@ public class RedisService : IRedisService
             // Get total keys using DatabaseSize for better performance
             try
             {
-                serverInfo.TotalKeys = await server.DatabaseSizeAsync(_currentConnection?.Database ?? 0);
+                serverInfo.TotalKeys = await server.DatabaseSizeAsync(_currentConnection?.Database ?? 0).ConfigureAwait(false);
             }
             catch
             {
@@ -197,6 +215,38 @@ public class RedisService : IRedisService
         catch (Exception)
         {
             return new RedisServerInfo();
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                if (_connection != null)
+                {
+                    try
+                    {
+                        _connection.Close();
+                        _connection.Dispose();
+                    }
+                    catch
+                    {
+                        // Ignore exceptions during disposal
+                    }
+                    _connection = null;
+                    _database = null;
+                    _currentConnection = null;
+                }
+            }
+            _disposed = true;
         }
     }
 }
