@@ -1,0 +1,56 @@
+name: Build RedisAssistant
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        
+    - name: Install MAUI workload
+      run: dotnet workload install maui
+      
+    - name: Restore dependencies
+      run: dotnet restore src/RedisAssistant/RedisAssistant.csproj
+      
+    - name: Build Windows
+      run: dotnet build src/RedisAssistant/RedisAssistant.csproj -f net9.0-windows10.0.19041.0 -c Release
+      
+    - name: Build Android
+      run: dotnet build src/RedisAssistant/RedisAssistant.csproj -f net9.0-android -c Release
+
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        
+    - name: Install MAUI workload
+      run: dotnet workload install maui
+      
+    - name: Restore dependencies
+      run: dotnet restore src/RedisAssistant/RedisAssistant.csproj
+      
+    - name: Build macOS
+      run: dotnet build src/RedisAssistant/RedisAssistant.csproj -f net9.0-maccatalyst -c Release
+      
+    - name: Build iOS
+      run: dotnet build src/RedisAssistant/RedisAssistant.csproj -f net9.0-ios -c Release
