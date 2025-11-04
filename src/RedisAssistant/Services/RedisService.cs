@@ -181,8 +181,16 @@ public class RedisService : IRedisService
                 }
             }
 
-            // Get total keys
-            serverInfo.TotalKeys = server.Keys().Count();
+            // Get total keys using DatabaseSize for better performance
+            try
+            {
+                serverInfo.TotalKeys = await server.DatabaseSizeAsync(_currentConnection?.Database ?? 0);
+            }
+            catch
+            {
+                // Fallback to 0 if DatabaseSize is not available
+                serverInfo.TotalKeys = 0;
+            }
 
             return serverInfo;
         }

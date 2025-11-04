@@ -4,10 +4,6 @@
              xmlns:vm="clr-namespace:RedisAssistant.ViewModels"
              x:Class="RedisAssistant.Views.ConnectionsPage"
              Title="Redis Connections">
-    
-    <ContentPage.BindingContext>
-        <vm:ConnectionsViewModel />
-    </ContentPage.BindingContext>
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">

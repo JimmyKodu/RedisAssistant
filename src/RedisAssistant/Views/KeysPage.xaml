@@ -5,10 +5,6 @@
              x:Class="RedisAssistant.Views.KeysPage"
              Title="Redis Keys">
 
-    <ContentPage.BindingContext>
-        <vm:KeysViewModel />
-    </ContentPage.BindingContext>
-
     <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="15">
         
         <!-- Search and Actions -->
