@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RedisAssistant.ViewModels"
+             x:Class="RedisAssistant.Views.ConnectionsPage"
+             Title="Redis Connections">
+    
+    <ContentPage.BindingContext>
+        <vm:ConnectionsViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            
+            <!-- Connection Status -->
+            <Frame BorderColor="LightGray" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Connection Status" FontSize="18" FontAttributes="Bold" />
+                    <Label Text="{Binding StatusMessage}" />
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="Status:" FontAttributes="Bold" />
+                        <Label Text="{Binding IsConnected, Converter={StaticResource BoolToStatusConverter}}" />
+                    </HorizontalStackLayout>
+                    <Button Text="Disconnect" 
+                            Command="{Binding DisconnectCommand}"
+                            IsEnabled="{Binding IsConnected}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- New Connection Form -->
+            <Frame BorderColor="LightGray" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Add New Connection" FontSize="18" FontAttributes="Bold" />
+                    
+                    <Label Text="Connection Name" />
+                    <Entry Text="{Binding ConnectionName}" Placeholder="My Redis Server" />
+                    
+                    <Label Text="Host" />
+                    <Entry Text="{Binding Host}" Placeholder="localhost" />
+                    
+                    <Label Text="Port" />
+                    <Entry Text="{Binding Port}" Keyboard="Numeric" Placeholder="6379" />
+                    
+                    <Label Text="Password (optional)" />
+                    <Entry Text="{Binding Password}" IsPassword="True" Placeholder="Password" />
+                    
+                    <Label Text="Database" />
+                    <Entry Text="{Binding Database}" Keyboard="Numeric" Placeholder="0" />
+                    
+                    <HorizontalStackLayout Spacing="10">
+                        <CheckBox IsChecked="{Binding UseSsl}" />
+                        <Label Text="Use SSL" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    
+                    <Button Text="Add Connection" Command="{Binding AddConnectionCommand}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Saved Connections -->
+            <Frame BorderColor="LightGray" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Saved Connections" FontSize="18" FontAttributes="Bold" />
+                    
+                    <CollectionView ItemsSource="{Binding Connections}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame BorderColor="LightGray" Padding="10" Margin="0,5">
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                                        <VerticalStackLayout Grid.Column="0">
+                                            <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                            <Label Text="{Binding Host}" FontSize="12" />
+                                            <Label Text="{Binding Port, StringFormat='Port: {0}'}" FontSize="12" />
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1" 
+                                                Text="Connect" 
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ConnectionsViewModel}}, Path=ConnectCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Grid.Column="2" 
+                                                Text="Delete" 
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ConnectionsViewModel}}, Path=DeleteConnectionCommand}"
+                                                CommandParameter="{Binding .}" />
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
